@@ -12,9 +12,11 @@ AltTextGenerator is a Python script designed to automatically generate alt text 
 
 ## Requirements
 
-- Python 3.8 or above
-- PyTorch and the Hugging Face Transformers library
-- Pillow for image handling
+- Python 3.12 or above
+- Pillow (>=11.1.0,<12.0.0) for image handling
+- Hugging Face Transformers (>=4.48.0,<5.0.0) library
+- torch (>=2.5.1,<3.0.0) library
+
 
 ## Installation
 
@@ -23,10 +25,20 @@ AltTextGenerator is a Python script designed to automatically generate alt text 
    git clone https://github.com/fvarghese99/AltTextGenerator.git
    cd AltTextGenerator
     ```
-2. Install the required packages:
+2. Create a virtual environment (recommended):
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # For macOS/Linux
+    venv\Scripts\activate     # For Windows
+    ```
+3. Install the required packages:
     ```bash
     pip install -r requirements.txt
    ```
+    Alternatively, use the `setup.py` file:
+    ```bash
+    pip install .
+    ```
 
 ## Usage
 
@@ -45,6 +57,7 @@ AltTextGenerator is a Python script designed to automatically generate alt text 
 5. View the renamed images in the specified folder.
 
 ## Notes
+
 - Images are resized to 512x512 pixels for compatibility with the BLIP2 model.
 - Ensure that the folder path provided contains supported image formats.
 
@@ -63,6 +76,7 @@ Renamed image to: img/A brick building with a sign on the side.jpg
 ```
 
 ## Supported Image Formats
+
 - `.jpg`
 - `.jpeg`
 - `.png`
