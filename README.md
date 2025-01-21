@@ -71,6 +71,6 @@ Renamed image to: img/A brick building with a sign on the side.jpg
 
 ## Acknowledgements
 
-- [Hugging Face Transformers](https://huggingface.co/transformers/)
-- [PyTorch](https://pytorch.org/)
+- [Hugging Face Transformers](https://github.com/huggingface/transformers)
+- [PyTorch](https://pytorch.org)
 - [BLIP2](https://huggingface.co/Salesforce/blip2-opt-2.7b)
