@@ -4,7 +4,6 @@ from PIL import Image
 import torch
 from transformers import Blip2Processor, Blip2ForConditionalGeneration
 
-
 #########################
 # 1. Identify Images
 #########################
@@ -20,12 +19,11 @@ def find_images_without_alt_text(folder_path):
     for root, _, files in os.walk(folder_path):
         for file in files:
             if file.lower().endswith(supported_extensions):
-                # In real usage, check if your CMS has an alt text stored.
+                # In a real system, check if your CMS has an alt text stored.
                 # If not, add to list. Here, we assume all images lack alt text.
                 image_paths.append(os.path.join(root, file))
 
     return image_paths
-
 
 #########################
 # 2. Generate Captions
@@ -34,14 +32,14 @@ def load_blip2_model():
     """
     Load the BLIP2 model and processor from Hugging Face.
 
-    We automatically detect which device to run on:
-      - 'cuda' if an NVIDIA GPU is available (Windows/Linux typically),
-      - 'mps' if on Apple Silicon (M1/M2),
-      - otherwise 'cpu'.
+    Automatically detects which device to run on:
+     - 'cuda' if an NVIDIA GPU is available (Windows/Linux),
+     - 'mps' if on Apple Silicon (M1/M2),
+     - otherwise 'cpu'.
     """
     print("Loading BLIP2 model...")
-    processor = Blip2Processor.from_pretrained("Salesforce/blip2-flan-t5-base")
-    model = Blip2ForConditionalGeneration.from_pretrained("Salesforce/blip2-flan-t5-base")
+    processor = Blip2Processor.from_pretrained("Salesforce/blip2-opt-2.7b")
+    model = Blip2ForConditionalGeneration.from_pretrained("Salesforce/blip2-opt-2.7b")
 
     # Automatic device selection
     if torch.cuda.is_available():
@@ -54,54 +52,54 @@ def load_blip2_model():
         device = torch.device("cpu")
         print("Using CPU (no GPU detected).")
 
+    # Move model to the selected device
     model = model.to(device)
-
     return processor, model, device
-
 
 def generate_caption(processor, model, device, image_path):
     """
-    Use the BLIP2 model to produce a basic caption describing the image.
+    Open any image, convert to RGB, optionally resize, then generate a basic caption.
     """
-    image = Image.open(image_path).convert("RGB")
+    # 1. Open the image
+    image = Image.open(image_path)
 
+    # 2. Convert to RGB mode
+    image = image.convert("RGB")
+
+    # 3. Resize to avoid shape mismatches on MPS (and standardise input size)
+    image = image.resize((512, 512))
+
+    # 4. Prepare BLIP2 input
     inputs = processor(images=image, return_tensors="pt")
-
-    # Move inputs to the selected device
     inputs = {k: v.to(device) for k, v in inputs.items()}
 
+    # 5. Generate the caption
     with torch.no_grad():
-        output = model.generate(**inputs, max_new_tokens=50)
+        outputs = model.generate(**inputs)
 
-    caption = processor.tokenizer.decode(output[0], skip_special_tokens=True)
+    caption = processor.batch_decode(outputs, skip_special_tokens=True)
     return caption
-
 
 #########################
 # 3. Refine with Ollama
 #########################
 def refine_caption_with_ollama(caption):
     """
-    Uses the Ollama command-line interface to refine the caption.
-
-    Make sure 'ollama' is in your PATH or provide the full path to the ollama binary.
+    Uses Ollama to refine the caption. Your Ollama version expects a positional
+    argument for the prompt (rather than stdin or --prompt).
     """
-    prompt = (
+    prompt_text = (
         f"Refine the following image description into a concise alt text: {caption}\n"
         "Keep it brief and descriptive."
     )
 
-    # Note: on Windows, you might need to use shell=True or other adjustments.
-    # Also consider using the subprocess 'text' or 'capture_output' arguments if needed.
+    # Provide the prompt as a positional argument:
     result = subprocess.run(
-        ["ollama", "prompt", prompt],
+        ["ollama", "run", prompt_text],
         stdout=subprocess.PIPE,
-        universal_newlines=True
+        text=True
     )
-
-    refined_text = result.stdout.strip()
-    return refined_text
-
+    return result.stdout.strip()
 
 #########################
 # 4. Store/Update Alt Text
@@ -109,14 +107,11 @@ def refine_caption_with_ollama(caption):
 def update_alt_text_in_cms(image_path, alt_text):
     """
     Dummy function to show how you might save alt text.
-    In practice, you’d interact with Umbraco’s API or database.
+    In practice, you'd interact with Umbraco's API or database.
     """
-    # Example: print or log the result
-    # In real usage, call your Umbraco endpoint to update alt text for the media item.
     print(f"Image Path: {image_path}")
     print(f"Generated Alt Text: {alt_text}")
-    print("-" * 60)
-
+    print("-" * 80)
 
 #########################
 # MAIN SCRIPT
@@ -139,16 +134,15 @@ def main():
     for image_path in images:
         print(f"Processing: {image_path}")
 
-        # Generate initial caption
+        # Generate initial caption (BLIP2)
         initial_caption = generate_caption(processor, model, device, image_path)
         print(f"Initial Caption: {initial_caption}")
 
         # Refine with Ollama
         alt_text = refine_caption_with_ollama(initial_caption)
 
-        # Step 4: Update alt text in your CMS
+        # Step 4: Update alt text in your "CMS"
         update_alt_text_in_cms(image_path, alt_text)
-
 
 if __name__ == "__main__":
     main()
