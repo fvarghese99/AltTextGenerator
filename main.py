@@ -45,12 +45,15 @@ def load_blip2_model():
     if torch.cuda.is_available():
         device = torch.device("cuda")
         print("Using CUDA (NVIDIA GPU).")
+        print("-" * 100)
     elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
         device = torch.device("mps")
         print("Using MPS (Apple Silicon).")
+        print("-" * 100)
     else:
         device = torch.device("cpu")
         print("Using CPU (no GPU detected).")
+        print("-" * 100)
 
     # Move model to the selected device
     model = model.to(device)
@@ -77,32 +80,16 @@ def generate_caption(processor, model, device, image_path):
     with torch.no_grad():
         outputs = model.generate(**inputs)
 
-    caption = processor.batch_decode(outputs, skip_special_tokens=True)
-    return caption
+    # BLIP2 can return multiple captions in a list
+    # We'll take the first string as our alt text
+    caption_list = processor.batch_decode(outputs, skip_special_tokens=True)
+    if caption_list:
+        return caption_list[0]
+    else:
+        return ""  # fallback if somehow empty
 
 #########################
-# 3. Refine with Ollama
-#########################
-def refine_caption_with_ollama(caption):
-    """
-    Uses Ollama to refine the caption. Your Ollama version expects a positional
-    argument for the prompt (rather than stdin or --prompt).
-    """
-    prompt_text = (
-        f"Refine the following image description into a concise alt text: {caption}\n"
-        "Keep it brief and descriptive."
-    )
-
-    # Provide the prompt as a positional argument:
-    result = subprocess.run(
-        ["ollama", "run", prompt_text],
-        stdout=subprocess.PIPE,
-        text=True
-    )
-    return result.stdout.strip()
-
-#########################
-# 4. Store/Update Alt Text
+# 3. Store/Update Alt Text
 #########################
 def update_alt_text_in_cms(image_path, alt_text):
     """
@@ -111,7 +98,7 @@ def update_alt_text_in_cms(image_path, alt_text):
     """
     print(f"Image Path: {image_path}")
     print(f"Generated Alt Text: {alt_text}")
-    print("-" * 80)
+    print("-" * 100)
 
 #########################
 # MAIN SCRIPT
@@ -132,14 +119,8 @@ def main():
 
     # Step 3: Loop through images and handle
     for image_path in images:
-        print(f"Processing: {image_path}")
-
-        # Generate initial caption (BLIP2)
-        initial_caption = generate_caption(processor, model, device, image_path)
-        print(f"Initial Caption: {initial_caption}")
-
-        # Refine with Ollama
-        alt_text = refine_caption_with_ollama(initial_caption)
+        # Generate alt text from BLIP2
+        alt_text = generate_caption(processor, model, device, image_path)
 
         # Step 4: Update alt text in your "CMS"
         update_alt_text_in_cms(image_path, alt_text)
