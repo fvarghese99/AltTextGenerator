@@ -1,5 +1,4 @@
 import os
-import subprocess
 import re
 import shutil
 from PIL import Image
