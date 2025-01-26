@@ -29,7 +29,7 @@ AltTextGenerator is a Python script designed to automatically generate alt text 
     ```
 2. Create a virtual environment (recommended):
     ```bash
-    python -m venv venv
+    python -m venv AltTextGeneratorEnv
     source venv/bin/activate  # For macOS/Linux
     venv\Scripts\activate     # For Windows
     ```
