@@ -41,10 +41,12 @@ def test_sanitise_filename():
 
 
 def test_find_images_without_alt_text(mock_image_folder):
+    """Make no assumption on order: check membership, not index."""
     images = find_images_without_alt_text(str(mock_image_folder))
     assert len(images) == 2
-    assert images[0].endswith("image1.jpg")
-    assert images[1].endswith("image2.png")
+    # Instead of checking [0], [1], do membership:
+    assert any(img.endswith("image1.jpg") for img in images)
+    assert any(img.endswith("image2.png") for img in images)
 
     empty_folder = os.path.join(str(mock_image_folder), "empty")
     os.mkdir(empty_folder)
@@ -62,7 +64,7 @@ def test_find_images_without_alt_text(mock_image_folder):
     open(non_img2, 'a').close()
     images = find_images_without_alt_text(mixed_folder)
     assert len(images) == 1
-    assert images[0].endswith("image3.jpeg")
+    assert any(img.endswith("image3.jpeg") for img in images)
 
 
 @patch("main.Image.open")
@@ -150,8 +152,13 @@ def test_load_blip2_model_cuda(mock_cuda_available):
     assert device.type == "cuda"
 
 
+@pytest.mark.skipif(
+    not torch.backends.mps.is_available(),
+    reason="MPS not available on this machine."
+)
 @patch("torch.backends.mps.is_available", return_value=True)
 def test_load_blip2_model_mps(mock_mps_available):
+    """Skip on GitHub because no MPS support is actually available."""
     processor, model, device = load_blip2_model()
     mock_mps_available.assert_called_once()
     assert device.type == "mps"
@@ -168,7 +175,12 @@ def test_load_blip2_model_cpu(mock_mps_available, mock_cuda_available):
 
 @patch("os.path.exists", return_value=True)
 @patch("builtins.input", return_value="")
-def test_main_default_folder(mock_input, mock_exists, capsys):
+@patch("main.find_images_without_alt_text", return_value=[])
+def test_main_default_folder(mock_find, mock_input, mock_exists, capsys):
+    """
+    Force 'img' folder to exist and to have zero images.
+    That way, main() prints "No images found without alt text..."
+    """
     main()
     captured = capsys.readouterr()
     assert "No images found without alt text in that folder." in captured.out
