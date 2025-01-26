@@ -16,6 +16,8 @@ AltTextGenerator is a Python script designed to automatically generate alt text 
 - Pillow (>=11.1.0,<12.0.0) for image handling
 - Hugging Face Transformers (>=4.48.0,<5.0.0) library
 - torch (>=2.5.1,<3.0.0) library
+- pytest 7.4.4 or above
+- setuptools 75.1.0 or above
 
 
 ## Installation
