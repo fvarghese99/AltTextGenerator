@@ -25,13 +25,23 @@ AltTextGenerator is a Python script designed to automatically generate alt text 
 1. Clone the repository or download the script:
    ```bash
    git clone https://github.com/fvarghese99/AltTextGenerator.git
+   ```
+    Navigate to the project directory:
+    ```bash
    cd AltTextGenerator
     ```
-2. Create a virtual environment (recommended):
+2. Create a virtual environment with custom name 'AltTextGeneratorEnv' (recommended):
     ```bash
     python -m venv AltTextGeneratorEnv
-    source venv/bin/activate  # For macOS/Linux
-    venv\Scripts\activate     # For Windows
+   ```
+    Activate the virtual environment:   <br>
+    For macOS/Linux <br>
+   ```bash
+    source AltTextGeneratorEnv/bin/activate  
+   ```
+    For Windows <br>
+    ```bash
+    AltTextGeneratorEnv\Scripts\activate     
     ```
 3. Install the required packages:
     ```bash
