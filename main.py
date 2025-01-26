@@ -53,6 +53,9 @@ def find_images_without_alt_text(folder_path):
     """
     For this example, we simply list all images in a folder.
     """
+    if not os.path.exists(folder_path):
+        raise FileNotFoundError(f"The folder {folder_path} does not exist.")
+
     supported_extensions = (".jpg", ".jpeg", ".png", ".gif", ".webp")
     image_paths = []
 
@@ -107,6 +110,9 @@ def generate_caption(processor, model, device, image_path):
     """
     Open any image, convert to RGB, optionally resize, then generate a basic caption.
     """
+    if processor is None or model is None:
+        raise AttributeError("Model or processor is None.")
+
     # 1. Open the image
     image = Image.open(image_path).convert("RGB")
 
@@ -157,6 +163,7 @@ def update_alt_text(image_path, alt_text):
             print(f"Renamed image to: {new_path}")
         except OSError as e:
             print(f"Failed to rename file: {e}")
+            raise
     else:
         print("No alt text to rename file.")
 
