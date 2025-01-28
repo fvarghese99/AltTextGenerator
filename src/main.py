@@ -34,6 +34,7 @@ def update_alt_text(image_path, alt_text):
         width = shutil.get_terminal_size().columns
     except OSError:
         width = 100
+        width = min(width, 100)  # Limit width to 100
     print("-" * width)
 
 def main():
