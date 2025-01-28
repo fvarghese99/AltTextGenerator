@@ -16,7 +16,6 @@ AltTextGenerator is a Python script designed to automatically generate alt text 
 - Pillow (>=11.1.0,<12.0.0) for image handling
 - Hugging Face Transformers (>=4.48.0,<5.0.0) library
 - torch (>=2.5.1,<3.0.0) library
-- pytest 7.4.4 or above for testing
 
 ## Installation
 
@@ -26,7 +25,7 @@ AltTextGenerator is a Python script designed to automatically generate alt text 
    ```
     Navigate to the project directory:
     ```bash
-   cd AltTextGenerator
+   cd /path/to/AltTextGenerator
     ```
 2. Create a virtual environment with custom name 'AltTextGeneratorEnv' (recommended):
     ```bash
@@ -51,16 +50,48 @@ AltTextGenerator is a Python script designed to automatically generate alt text 
 1. Place the images in the default img folder or create your own folder.
 2. Run the script:
     ```bash
-    python main.py
+    python -m src.main
     ```
 3. When prompted, enter the path to the folder containing images or press Enter to use the default img folder:
     ```bash
-    Enter the path to the folder with images (or press Enter for 'img'): 
+    Enter the path to the folder with images (or press Enter for './data/img'): 
     ```
 4. The script will:
     - Generate alt text for each image.
     - Rename the images based on the generated alt text.
 5. View the renamed images in the specified folder.
+
+## Testing
+
+To ensure the script is working correctly, follow these steps to run the tests:
+1. Install the pytest package:
+    ```bash
+    pip install pytest
+    ```
+2. Run all tests:
+    ```bash
+    pytest tests/
+    ```
+3. Test details:
+- The tests include validation for:
+  - The BLIP2 model functionality.
+  - Utility functions for file and image processing.
+  - End-to-end integration of image processing and renaming.
+4. Check the output to conform that all tests have passed. Example:
+    ```bash
+    ============================= test session starts ==============================
+    platform darwin -- Python 3.12.8, pytest-7.4.4, pluggy-1.5.0
+    rootdir: /AltTextGenerator
+    plugins: cov-6.0.0
+    collected 24 items
+
+    tests/test_blip2.py ......                                              [ 25%]
+    tests/test_file_utils.py ......                                         [ 50%]
+    tests/test_image_utils.py ......                                        [ 75%]
+    tests/test_main.py ......                                               [100%]
+
+    ============================== 24 passed in 5.06s ===============================
+    ```
 
 ## Notes
 
@@ -74,7 +105,7 @@ Enter the path to the folder with images (or press Enter for 'img'):
 Loading BLIP2 model...
 Using MPS (Apple Silicon).
 ------------------------------------------------------------------
-Image Path: img/a brick building with a sign on the side.jpg
+Image Path: img/img-1.jpg
 Generated Alt Text: A brick building with a sign on the side
 
 Renamed image to: img/A brick building with a sign on the side.jpg
