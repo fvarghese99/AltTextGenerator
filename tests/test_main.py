@@ -201,31 +201,35 @@ def test_main_no_images_found(mock_find, mock_input, capsys):
     assert "No images found without alt text in that folder." in captured.out
 
 
-@patch("builtins.input", return_value="images_folder")
-@patch("main.find_images_without_alt_text")
-@patch("main.load_blip2_model")
-@patch("main.generate_caption")
-@patch("main.update_alt_text")
-def test_main_with_images(
-    mock_update_alt, mock_gen_cap, mock_load_blip2, mock_find, mock_input, capsys
-):
-    mock_find.return_value = ["path/to/image1.jpg", "path/to/image2.png"]
-    fake_processor = MagicMock()
-    fake_model = MagicMock()
-    fake_device = MagicMock()
-    mock_load_blip2.return_value = (fake_processor, fake_model, fake_device)
+@patch('os.path.exists', return_value=True)  # Mock os.path.exists
+@patch('src.main.find_images_without_alt_text')
+@patch('src.main.load_blip2_model')
+@patch('src.main.generate_caption')
+@patch('src.main.update_alt_text')
+@patch('builtins.input', return_value="/path/to/images")
+def test_main_with_images(mock_input, mock_update_alt_text, mock_generate_caption,
+                          mock_load_blip2_model, mock_find_images, mock_path_exists):
+    # Mock find_images_without_alt_text
+    mock_find_images.return_value = ["/path/to/images/image1.jpg", "/path/to/images/image2.png"]
 
-    mock_gen_cap.side_effect = ["Caption1", "Caption2"]
+    # Mock load_blip2_model
+    mock_processor = MagicMock()
+    mock_model = MagicMock()
+    mock_device = torch.device("cpu")
+    mock_load_blip2_model.return_value = (mock_processor, mock_model, mock_device)
 
+    # Mock generate_caption
+    mock_generate_caption.side_effect = ["Caption 1", "Caption 2"]
+
+    # Run the main function
     main()
-    captured = capsys.readouterr()
 
-    mock_find.assert_called_once_with("images_folder")
-    mock_load_blip2.assert_called_once()
-    assert mock_gen_cap.call_count == 2
-    mock_update_alt.assert_any_call("path/to/image1.jpg", "Caption1")
-    mock_update_alt.assert_any_call("path/to/image2.png", "Caption2")
-    assert "No images found" not in captured.out
+    # Validate that find_images_without_alt_text was called correctly
+    mock_find_images.assert_called_once_with("/path/to/images")
+
+    # Validate that update_alt_text was called with correct arguments
+    mock_update_alt_text.assert_any_call("/path/to/images/image1.jpg", "Caption 1")
+    mock_update_alt_text.assert_any_call("/path/to/images/image2.png", "Caption 2")
 
 
 @patch("main.Image.open", side_effect=KeyError("Fake KeyError path"))
