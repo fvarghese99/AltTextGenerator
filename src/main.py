@@ -6,12 +6,13 @@ from .helpers.file_utils import sanitise_filename
 from .helpers.image_utils import find_images_without_alt_text
 from .models.blip2 import load_blip2_model, generate_caption
 
+
 def update_alt_text(image_path, alt_text):
     """
     Print and rename image files based on generated alt text.
     """
-    print(f"Image Path: {image_path}")
-    print(f"Generated Alt Text: {alt_text}")
+    print(f"🖼️ Image Path: {image_path}")
+    print(f"📝 Generated Alt Text: {alt_text}")
 
     _, ext = os.path.splitext(image_path)
     safe_alt_text = sanitise_filename(alt_text)
@@ -22,11 +23,11 @@ def update_alt_text(image_path, alt_text):
     if safe_alt_text:
         try:
             os.rename(image_path, new_path)
-            print(f"Renamed image to: {new_path}")
+            print(f"✅ Renamed image to: {new_path}")
         except OSError as e:
-            print(f"Failed to rename file: {e}")
+            print(f"❌ Failed to rename file: {e}")
     else:
-        print("No alt text to rename file.")
+        print("⚠️ No alt text to rename file.")
 
     # Dynamically get terminal width, fallback to 100
     try:
@@ -36,6 +37,7 @@ def update_alt_text(image_path, alt_text):
         width = 100
         width = min(width, 100)  # Limit width to 100
     print("-" * width)
+
 
 def main():
     # Detect operating system and set default folder path
@@ -52,19 +54,23 @@ def main():
         folder_path = default_folder
 
     if not os.path.exists(folder_path):
-        print(f"The folder {folder_path} does not exist.")
+        print(f"❌ The folder '{folder_path}' does not exist.")
         return
 
     images = find_images_without_alt_text(folder_path)
     if not images:
-        print("No images found without alt text in that folder.")
+        print("⚠️ No images found without alt text in that folder.")
         return
 
+    print("\n📥 Loading BLIP-2 model (this may take a while)...")
     processor, model, device = load_blip2_model()
 
     for image_path in images:
         alt_text = generate_caption(processor, model, device, image_path)
         update_alt_text(image_path, alt_text)
+
+    print("\n✅ Processing completed.")
+
 
 if __name__ == "__main__":
     main()

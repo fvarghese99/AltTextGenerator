@@ -54,9 +54,9 @@ def test_update_alt_text_success(monkeypatch, tmpdir):
 
         mock_sanitise.assert_called_once_with(alt_text)
         mock_rename.assert_called_once_with(image_path, new_path)
-        mock_print.assert_any_call(f"Image Path: {image_path}")
-        mock_print.assert_any_call(f"Generated Alt Text: {alt_text}")
-        mock_print.assert_any_call(f"Renamed image to: {new_path}")
+        mock_print.assert_any_call(f"🖼️ Image Path: {image_path}")
+        mock_print.assert_any_call(f"📝 Generated Alt Text: {alt_text}")
+        mock_print.assert_any_call(f"✅ Renamed image to: {new_path}")
         mock_print.assert_any_call("-" * 100)
 
 
@@ -74,9 +74,9 @@ def test_update_alt_text_no_alt_text(monkeypatch, tmpdir):
         update_alt_text(image_path, alt_text)
 
         mock_rename.assert_not_called()
-        mock_print.assert_any_call("Image Path: {}".format(image_path))
-        mock_print.assert_any_call("Generated Alt Text: {}".format(alt_text))
-        mock_print.assert_any_call("No alt text to rename file.")
+        mock_print.assert_any_call("🖼️ Image Path: {}".format(image_path))
+        mock_print.assert_any_call("📝 Generated Alt Text: {}".format(alt_text))
+        mock_print.assert_any_call("⚠️ No alt text to rename file.")
         mock_print.assert_any_call("-" * 100)
 
 
@@ -95,7 +95,7 @@ def test_update_alt_text_rename_failure(monkeypatch, tmpdir):
             patch('builtins.print') as mock_print:
         update_alt_text(image_path, alt_text)
 
-        mock_print.assert_any_call(f"Failed to rename file: Permission denied")
+        mock_print.assert_any_call(f"❌ Failed to rename file: Permission denied")
         mock_print.assert_any_call("-" * 100)
 
 
@@ -105,7 +105,7 @@ def test_main_no_images(mock_input, mock_find_images, mock_load_blip2_model, moc
     mock_find_images.return_value = []
     with patch('builtins.print') as mock_print:
         main()
-        mock_print.assert_called_with("No images found without alt text in that folder.")
+        mock_print.assert_called_with("⚠️ No images found without alt text in that folder.")
 
 
 @patch('os.path.exists', return_value=True)  # Mock os.path.exists to always return True
