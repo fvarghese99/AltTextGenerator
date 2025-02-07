@@ -17,6 +17,14 @@ AltTextGenerator is a Python script designed to automatically generate alt text 
 - Hugging Face Transformers (>=4.48.0,<5.0.0) library
 - torch (>=2.5.1,<3.0.0) library
 
+## PyTorch Dependencies
+
+To ensure you install the correct versions of torch, torchvision, and torchaudio that are compatible with your system (e.g. with CUDA support or CPU-only), please refer to the official [PyTorch Get Started Locally](https://pytorch.org/get-started/locally/) page.
+<br>For example, if you are using pip and wish to install a CUDA-enabled version (replace cu126 with the CUDA version suited to your system), you might run:
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
+```
+
 ## Installation
 
 1. Clone the repository or download the script:
@@ -73,10 +81,11 @@ To ensure the script is working correctly, follow these steps to run the tests:
     pytest tests/
     ```
 3. Test details:
-- The tests include validation for:
-  - The BLIP2 model functionality.
-  - Utility functions for file and image processing.
-  - End-to-end integration of image processing and renaming.
+   - The tests include validation for:
+     - The BLIP2 model functionality.
+     - Utility functions for file and image processing.
+     - End-to-end integration of image processing and renaming.<br>
+  
 4. Check the output to conform that all tests have passed. Example:
     ```bash
     ============================= test session starts ==============================
