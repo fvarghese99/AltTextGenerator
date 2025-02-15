@@ -9,12 +9,11 @@ def sanitise_filename(text: str, max_length: int = 100) -> str:
     If the original text is empty or only whitespace, returns an empty string.
     If the result is empty for non-empty input, returns a fallback using a short UUID.
     """
-    original = text
     text = text.strip()
     if not text:
         return ""
 
-    text = re.sub(r'[\\\/:*?"<>|]', '', text)
+    text = re.sub(r'[\\/:*?"<>|]', '', text)
     text = text.lower()
 
     # Truncate to max_length preserving whole tokens where possible

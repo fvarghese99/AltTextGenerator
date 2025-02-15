@@ -11,7 +11,7 @@ def has_alt_text(image_path: str) -> bool:
     """
     try:
         with Image.open(image_path) as img:
-            exif = img._getexif()
+            exif = img.getexif()
             if exif and 270 in exif and exif[270]:
                 return True
     except Exception as e:
