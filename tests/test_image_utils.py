@@ -3,7 +3,9 @@
 import os
 import pytest
 import tempfile
-from src.helpers.image_utils import find_images_without_alt_text
+from unittest.mock import patch, MagicMock
+from PIL import Image
+from src.helpers.image_utils import find_images_without_alt_text, has_alt_text
 
 @pytest.fixture
 def setup_temp_dir():
@@ -22,6 +24,33 @@ def setup_temp_dir():
         for file in image_files:
             open(os.path.join(tmpdir, file), 'a').close()
         yield tmpdir
+
+def test_has_alt_text_true():
+    with patch.object(Image, 'open') as mock_open:
+        # Create the mock image
+        mock_img = MagicMock()
+        # If your code checks format, set it:
+        mock_img.format = "JPEG"
+        # Make getexif() return a dict with tag 270
+        mock_img.getexif.return_value = {270: "Sample alt text"}
+        # Ensure the context manager returns this mock image
+        mock_open.return_value.__enter__.return_value = mock_img
+
+        assert has_alt_text("fake_path.jpg") is True
+
+def test_has_alt_text_false():
+    # Mock an image with no EXIF data or empty description
+    mock_exif = {270: ""}
+    mock_img = MagicMock()
+    mock_img.getexif.return_value = mock_exif
+
+    with patch.object(Image, 'open', return_value=mock_img):
+        assert has_alt_text("fake_path.jpg") is False
+
+def test_has_alt_text_exception():
+    # Force an exception when opening the image
+    with patch.object(Image, 'open', side_effect=OSError("Cannot open")):
+        assert has_alt_text("fake_path.jpg") is False
 
 def test_find_images_without_alt_text(setup_temp_dir):
     tmpdir = setup_temp_dir

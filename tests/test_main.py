@@ -100,9 +100,11 @@ def test_update_alt_text_rename_failure(monkeypatch, tmpdir):
 
 
 @patch('builtins.input', return_value="")
-def test_main_no_images(mock_input, mock_find_images, mock_load_blip2_model, mock_generate_caption,
-                        mock_update_alt_text):
-    mock_find_images.return_value = []
+@patch('os.path.exists', return_value=True)
+def test_main_no_images(mock_input, mock_exists,
+                        mock_find_images, mock_load_blip2_model,
+                        mock_generate_caption, mock_update_alt_text):
+    mock_find_images.return_value = []  # no images
     with patch('builtins.print') as mock_print:
         main()
         mock_print.assert_called_with("⚠️ No images found without alt text in that folder.")
@@ -138,3 +140,54 @@ def test_main_with_images(mock_input, mock_update_alt_text, mock_generate_captio
     mock_update_alt_text.assert_any_call("/path/to/images/image1.jpg", "Caption 1")
     mock_update_alt_text.assert_any_call("/path/to/images/image2.png", "Caption 2")
     # Ensure print statements are called appropriately
+
+
+@patch('builtins.input', return_value="/some/path")
+@patch('os.path.exists', return_value=True)
+@patch('os.walk')
+@patch('src.main.generate_caption')
+@patch('src.main.sanitise_filename')
+def test_main_verification_mismatch(
+    mock_sanitise, mock_generate_caption, mock_walk, mock_path_exists, mock_input
+):
+    # The folder contains one image
+    mock_walk.return_value = [
+        ("/some/path", [], ["mismatched.jpg"]),
+    ]
+    mock_generate_caption.return_value = "Correct Alt"
+    mock_sanitise.return_value = "Correct_alt"
+
+    # 1) Return a non-empty list here so the code doesn’t return early
+    with patch('src.main.find_images_without_alt_text', return_value=["/some/path/mismatched.jpg"]):
+        with patch('src.main.update_alt_text') as mock_update:
+            main()
+
+    # 2) The second pass sees "mismatched.jpg" => alt text "Correct Alt" => "Correct_alt"
+    mock_update.assert_any_call("/some/path/mismatched.jpg", "Correct Alt")
+
+
+@patch('shutil.get_terminal_size', return_value=os.terminal_size((100, 24)))
+def test_update_alt_text_collision(mock_terminal_size, tmpdir):
+    image_path = os.path.join(tmpdir, "image.jpg")
+    with open(image_path, 'w') as f:
+        f.write("fake image content")
+
+    alt_text = "Collision"
+    safe_name = "Collision"
+
+    # Create an existing file with the same name "Collision.jpg"
+    existing_file = os.path.join(tmpdir, "Collision.jpg")
+    with open(existing_file, 'w') as f:
+        f.write("already exists")
+
+    # Next rename candidate would be "Collision_1.jpg"
+    new_path = os.path.join(tmpdir, "Collision_1.jpg")
+
+    with patch('src.main.sanitise_filename', return_value=safe_name), \
+         patch('builtins.print') as mock_print:
+        update_alt_text(image_path, alt_text)
+
+        # The code should skip "Collision.jpg" (since it already exists)
+        # and rename to "Collision_1.jpg"
+        assert os.path.exists(new_path)
+        mock_print.assert_any_call(f"✅ Renamed image to: {new_path}")
