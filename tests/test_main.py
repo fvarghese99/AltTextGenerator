@@ -147,9 +147,16 @@ def test_main_with_images(mock_input, mock_update_alt_text, mock_generate_captio
 @patch('os.walk')
 @patch('src.main.generate_caption')
 @patch('src.main.sanitise_filename')
+@patch('src.main.load_blip2_model')
 def test_main_verification_mismatch(
-    mock_sanitise, mock_generate_caption, mock_walk, mock_path_exists, mock_input
+    mock_load_blip2,mock_sanitise, mock_generate_caption, mock_walk, mock_path_exists, mock_input
 ):
+    # Return dummy objects for processor, model, and device
+    mock_processor = MagicMock()
+    mock_model = MagicMock()
+    mock_device = torch.device("cpu")
+    mock_load_blip2.return_value = (mock_processor, mock_model, mock_device)
+
     # The folder contains one image
     mock_walk.return_value = [
         ("/some/path", [], ["mismatched.jpg"]),
