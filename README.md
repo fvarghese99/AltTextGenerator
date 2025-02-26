@@ -6,7 +6,7 @@ AltTextGenerator is a Python script designed to automatically generate alt text 
 
 - Automatically generates alt text for images using the BLIP2 model.
 - Renames image files based on the generated alt text.
-- Supports a variety of image formats, including `.jpg`, `.jpeg`, `.png`, `.gif`, and `.webp`.
+- Supports a variety of image formats, including `.jpg`, `.jpeg`, `.png`, `.gif`, `.jfif`, `.svg`, and `.webp`.
 - Automatically detects the device for processing (CUDA, MPS, or CPU).
 - User-friendly interface for selecting the folder containing images.
 
@@ -16,6 +16,7 @@ AltTextGenerator is a Python script designed to automatically generate alt text 
 - Pillow (>=11.1.0,<12.0.0) for image handling
 - Hugging Face Transformers (>=4.48.0,<5.0.0) library
 - torch (>=2.5.1,<3.0.0) library
+- cairosvg (>=2.5.2,<3.0.0) for SVG image support
 
 ## Installation
 
@@ -127,6 +128,8 @@ Renamed image to: img/A brick building with a sign on the side.jpg
 - `.jpeg`
 - `.png`
 - `.gif`
+- `.jfif`
+- `.svg`
 - `.webp`
 
 ## Acknowledgements
