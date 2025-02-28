@@ -37,9 +37,9 @@ acceleration_type = detect_gpu_or_acceleration()
 # Specify dependencies based on OS and acceleration type
 if platform.system() == "Windows" and acceleration_type == "NVIDIA":
     torch_dependencies = [
-        "torch==2.5.1+cu118",
-        "torchvision==0.20.1+cu118",
-        "torchaudio==2.5.1+cu118",
+        "torch==2.5.1+cu126",
+        "torchvision==0.20.1+cu126",
+        "torchaudio==2.5.1+cu126",
     ]
 elif platform.system() == "Windows" and acceleration_type == "AMD":
     torch_dependencies = [
